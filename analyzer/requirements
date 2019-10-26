@@ -1,0 +1,5 @@
+pyshark==0.4.2.9
+pyyaml==5.1.2
+alembic==1.0.0
+sqlalchemy==1.11.4
+sqlalchemy-utils==0.33.6

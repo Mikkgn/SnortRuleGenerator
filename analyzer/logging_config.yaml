@@ -1,0 +1,25 @@
+version: 1
+
+root:
+  handlers: [console]
+  level:    DEBUG
+
+disable_existing_loggers: true
+
+loggers:
+  InterfaceReader:
+    level: DEBUG
+  asyncio:
+    level: ERROR
+
+
+handlers:
+  console:
+    class:     logging.StreamHandler
+    formatter: default
+    level:     DEBUG
+    stream:    ext://sys.stdout
+
+formatters:
+  default:
+    format:  "[%(levelname)-8s] %(asctime)s '%(name)s.%(funcName)s:%(lineno)s': %(message)s"
