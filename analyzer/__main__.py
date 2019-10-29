@@ -1,13 +1,17 @@
 from multiprocessing import Queue
 
+from analyzer.config import configuration
+from analyzer.db.engine import wait_db, init_db
 from analyzer.packet_analyzer import PacketAnalyzer
 from analyzer.reader import PcapReader
 
 
 def main():
     queue_ = Queue()
-    reader = PcapReader('sql_test.pcap', queue_)
+    wait_db(**configuration["db_config"])
+    init_db(configuration["db_config"])
     packet_analyzer = PacketAnalyzer(queue_)
+    reader = PcapReader('test.pcap', queue_)
     packet_analyzer.start()
     reader.start()
     reader.join()
@@ -15,5 +19,4 @@ def main():
     pass
 
 
-if __name__ == '__main__':
-    main()
+main()

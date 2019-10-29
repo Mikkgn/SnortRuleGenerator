@@ -1,11 +1,13 @@
 import uuid
+from datetime import datetime
 from enum import Enum
 
-from sqlalchemy import Column, String, Enum as EnumField, ForeignKey, INTEGER, Table
+from sqlalchemy import Column, String, Enum as EnumField, ForeignKey, INTEGER, Table, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
+from sqlalchemy_utils import UUIDType
 
-from analyzer.db.data_types import UUID, Json
+from analyzer.db.data_types import Json
 
 INT32_MAX = 2147483647
 
@@ -40,10 +42,15 @@ class PacketType(Enum):
         return cls.name
 
 
-sign_to_attacks_table = Table(
-    'signs_to_attack', metadata,
-    Column('sign_id', ForeignKey('signs.id', ondelete='CASCADE'), primary_key=True, nullable=False, index=True),
-    Column('attack_definition_id', ForeignKey('attack_definitions.id', ondelete='CASCADE'), primary_key=True,
+class EventType(Enum):
+    SIGN_DETECTED = 0
+    ATTACK_DETECTED = 1
+
+
+sign_to_definition_table = Table(
+    'signs_to_definitions', metadata,
+    Column('sign_id', UUIDType, ForeignKey('signs.id', ondelete='CASCADE'), primary_key=True, nullable=False, index=True),
+    Column('definition_id', UUIDType, ForeignKey('definitions.id', ondelete='CASCADE'), primary_key=True,
            nullable=False,
            index=True)
 )
@@ -52,7 +59,7 @@ sign_to_attacks_table = Table(
 class Sign(Base):
     __tablename__ = 'signs'
 
-    id = Column(UUID, primary_key=True, nullable=False, default=uuid.uuid4())
+    id = Column(UUIDType, primary_key=True, nullable=False, default=uuid.uuid4())
     packet_type = Column(EnumField(PacketType), nullable=False)
     search_type = Column(EnumField(SearchType), default=SearchType.REGEX, nullable=False)
     src = Column(EnumField(NetType), default=NetType.EXTERNAL, nullable=False)
@@ -62,11 +69,26 @@ class Sign(Base):
     order = Column(INTEGER, default=0, nullable=False)
 
 
-class AttackDefinition(Base):
-    __tablename__ = 'attack_definitions'
+class Definition(Base):
+    __tablename__ = 'definitions'
 
-    id = Column(UUID, primary_key=True, nullable=False, default=uuid.uuid4())
+    id = Column(UUIDType, primary_key=True, nullable=False, default=uuid.uuid4())
     name = Column(String(255), nullable=False, index=True)
     description = Column(String(1000), nullable=True)
-    signs = relationship('Sign', secondary='signs_to_attack')
+    signs = relationship('Sign', secondary='signs_to_definitions')
     criterion = Column(EnumField(Criterion), nullable=False, default=Criterion.ALL)
+
+
+class Event(Base):
+    __tablename__ = 'attack_events'
+
+    id = Column(UUIDType, primary_key=True, nullable=False, default=uuid.uuid4())
+    attack_id = Column(UUIDType, nullable=False, index=True)
+    attack_definition_id = Column(UUIDType, ForeignKey('definitions.id', ondelete='CASCADE'), nullable=True,
+                                  index=True)
+    attack_definition = relationship('Definition')
+    sign_id = Column(UUIDType, ForeignKey('signs.id', ondelete='CASCADE'), nullable=True, index=True)
+    sign = relationship('Sign')
+    packet = Column(Json, nullable=False)
+    event_type = Column(EnumField(EventType), nullable=False)
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow, index=True)

@@ -1,17 +1,20 @@
 import re
+import uuid
+from typing import List, Optional, Iterable, Tuple, Any, Dict, Union
 
 from pyshark.packet.fields import LayerFieldsContainer
-
-from analyzer.db.models import SearchType, Criterion, Sign
-from typing import List, Optional, Iterable, Tuple, Any, Mapping, Dict, Union
-
 from pyshark.packet.packet import Packet
-from analyzer.db.models import AttackDefinition, Sign
+from sqlalchemy.orm import Session
+
+from analyzer.db.models import Definition, Sign, EventType
+from analyzer.db.models import SearchType, Criterion, Event
 
 
-class AttackSignWrapper:
-    def __init__(self, sign: Sign):
+class SignWrapper:
+    def __init__(self, sign: Sign, definition_id: uuid.UUID):
         self._sign = sign
+        self._definition_id = definition_id
+        self._attack_unique_id: Optional[uuid.UUID] = None
         self._detected = False
         self._packet: Optional[Packet] = None
         self._index_of_founded_packet: Optional[int] = None
@@ -29,12 +32,16 @@ class AttackSignWrapper:
     def is_detected(self) -> bool:
         return self._detected
 
-    def assign_result(self, packet: Packet, result: Any) -> None:
+    def assign_result(self, packet: Packet, result: Any, scoped_session: Session) -> None:
         if result is True:
             self._detected = result
             self._packet = packet
             self._timestamp = packet.sniff_time
             self._index_of_founded_packet = packet.number
+            event = Event(sign_id=self._sign.id, packet=packet, attack_id=self._attack_unique_id,
+                          event_type=EventType.SIGN_DETECTED)
+            scoped_session.add(event)
+            scoped_session.commit()
 
     @property
     def packet_type(self):
@@ -53,23 +60,28 @@ class AttackSignWrapper:
     def criteria(self):
         return self._sign.result_criteria
 
-    def reset(self):
+    def reset(self, attack_id: uuid.UUID) -> None:
+        self._attack_unique_id = attack_id
         self._detected = False
         self._packet = None
         self._timestamp = None
         self._index_of_founded_packet = None
 
 
-class Attack(object):
-    def __init__(self, attack: AttackDefinition):
-        self._signs: List[AttackSignWrapper] = [AttackSignWrapper(sign) for sign in attack.signs]
+class DefinitionWrapper(object):
+    def __init__(self, definition: Definition):
+        self._signs: List[SignWrapper] = [SignWrapper(sign, definition_id=definition.id)
+                                          for sign in definition.signs]
         self._is_detected = False
+        self._attack_unique_id = uuid.uuid4()
+        self._definition = definition
 
     @property
-    def current_sign(self) -> AttackSignWrapper:
+    def current_sign(self) -> SignWrapper:
         for sign in self._signs:
             if not sign.is_detected:
                 return sign
+        raise RuntimeError(f"Не указаны сигнатуры для определения {self._definition.name}")
 
     def is_attack_detected(self):
         for sign in self._signs:
@@ -80,8 +92,9 @@ class Attack(object):
             return True
 
     def _reset(self):
+        self._attack_unique_id = uuid.uuid4()
         for sign in self._signs:
-            sign.reset()
+            sign.reset(self._attack_unique_id)
 
 
 def is_net_include_ip(ipv4_address, netmask):
@@ -93,12 +106,14 @@ def is_value_satisfies_condition(search_value: Union[str, int], search_type: Sea
     if value is None:
         return False
     datatype = type(search_value)
-    if search_type == SearchType.REGEX:
+    if search_type == SearchType.REGEX and isinstance(search_value, str):
         pattern = re.compile(search_value)
         if len(pattern.findall(value)):
             return True
     if search_type == SearchType.FULL_MATCH:
         return datatype(value) == search_value
+    else:
+        raise ValueError(f"Указан неизвестный тип сравнения {search_type.name}")
 
 
 def evaluate_result(summary_check_result: List[bool], check_type: Criterion) -> bool:
@@ -108,14 +123,16 @@ def evaluate_result(summary_check_result: List[bool], check_type: Criterion) -> 
             return True
         else:
             return False
-    if check_type == Criterion.ALL:
+    elif check_type == Criterion.ALL:
         if true_count == len(summary_check_result):
             return True
         else:
             return False
+    else:
+        raise ValueError(f"Указан неизвестный тип {check_type}")
 
 
-def analyze_packet(sign: AttackSignWrapper, packet: Packet, *args: Any, **kwargs: Any):
+def analyze_packet(sign: SignWrapper, packet: Packet, *args: Any, **kwargs: Any) -> bool:
     if getattr(packet, 'ip', None) is not None:
         if not is_net_include_ip(packet.ip.src, sign.src) or not is_net_include_ip(packet.ip.dst, sign.dst):
             return False
@@ -128,12 +145,16 @@ def analyze_packet(sign: AttackSignWrapper, packet: Packet, *args: Any, **kwargs
             else:
                 return False
         if summary_check_result:
-            summary_result = evaluate_result(summary_check_result, sign.criteria)
-            if summary_result is True:
-                return True
+            return evaluate_result(summary_check_result, sign.criteria)
+        else:
+            return False
     else:
         return False
 
 
-def packet_to_str(packet: Packet):
+def packet_to_str(packet: Packet) -> str:
     return f"{packet._packet_string} <{packet.highest_layer}> time:<{packet.sniff_time}>"
+
+
+def packet_to_dict(packet: Packet) -> Dict:
+    return dict()

@@ -20,7 +20,7 @@ class PcapReader(PacketReader):
         self.pcap_filename = filename
         super().__init__(queue_)
 
-    def run(self, *args: Any, **kwargs: Any):
+    def run(self, *args: Any, **kwargs: Any) -> None:
         self._logger.debug(f"Read traffic from {self.pcap_filename}")
         capture: FileCapture = pyshark.FileCapture(self.pcap_filename)
         for packet in capture:
@@ -33,7 +33,7 @@ class InterfaceReader(PacketReader):
         self.interface_name = interface_name
         super().__init__(queue_)
 
-    def run(self, *args: Any, **kwargs: Any):
+    def run(self, *args: Any, **kwargs: Any) -> None:
         self._logger.debug(f"Listening traffic on {self.interface_name}")
         capture: pyshark.LiveCapture = pyshark.LiveCapture(self.interface_name)
         while not self._stop_event.is_set():

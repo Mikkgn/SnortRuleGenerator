@@ -1,0 +1,40 @@
+version: '2.1'
+
+services:
+  db:
+    container_name: db
+    image: postgres:12.0-alpine
+    restart: always
+    networks:
+      - backend_nw
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+
+  analyzer:
+    container_name: analyzer
+    image: michailgg/analyzer:latest
+    environment:
+      DB_HOST: ${DB_HOST:-localhost}
+      DB_USER: ${DB_USER}
+      DB_PASS: ${DB_PASS}
+    build:
+      dockerfile: analyzer/Dockerfile
+      context: .
+    network_mode: host
+    volumes:
+      - ${PROJECT_DIR}:/opt/
+
+
+networks:
+  backend_nw:
+    driver: bridge
+  frontend_nw:
+    driver: bridge
+
+volumes:
+  postgres_data:
