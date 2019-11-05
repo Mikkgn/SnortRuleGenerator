@@ -2,6 +2,7 @@ import re
 import uuid
 from typing import List, Optional, Iterable, Tuple, Any, Dict, Union
 
+from pyshark.packet.common import Pickleable
 from pyshark.packet.fields import LayerFieldsContainer
 from pyshark.packet.packet import Packet
 from sqlalchemy.orm import Session
@@ -38,7 +39,7 @@ class SignWrapper:
             self._packet = packet
             self._timestamp = packet.sniff_time
             self._index_of_founded_packet = packet.number
-            event = Event(sign_id=self._sign.id, packet=packet, attack_id=self._attack_unique_id,
+            event = Event(sign_id=self._sign.id, packet=packet_to_dict(packet), attack_id=self._attack_unique_id,
                           event_type=EventType.SIGN_DETECTED)
             scoped_session.add(event)
             scoped_session.commit()
@@ -75,6 +76,7 @@ class DefinitionWrapper(object):
         self._is_detected = False
         self._attack_unique_id = uuid.uuid4()
         self._definition = definition
+        self._reset()
 
     @property
     def current_sign(self) -> SignWrapper:
@@ -157,4 +159,14 @@ def packet_to_str(packet: Packet) -> str:
 
 
 def packet_to_dict(packet: Packet) -> Dict:
-    return dict()
+    def obj_to_dict(value):
+        if isinstance(value, Pickleable):
+            d = value.__dict__
+            for key, value in d.items():
+                d[key] = obj_to_dict(value)
+        else:
+            d = value
+        return d
+
+    return obj_to_dict(packet)
+

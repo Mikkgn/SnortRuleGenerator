@@ -25,10 +25,23 @@ services:
     build:
       dockerfile: analyzer/Dockerfile
       context: .
+    depends_on:
+      - db
     network_mode: host
     volumes:
       - ${PROJECT_DIR}:/opt/
 
+  rabbitmq-stomp:
+    container_name: rabbitmq
+    image: michailgg/rabbitmq-stomp:latest
+    build:
+      dockerfile: rabbitmq-stomp/Dockerfile
+      context: .
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-root}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS:-P@ssword}
+    ports:
+      - 15674:15674
 
 networks:
   backend_nw:
