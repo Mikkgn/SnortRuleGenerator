@@ -40,8 +40,11 @@ services:
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-root}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS:-P@ssword}
+    volumes:
+      - rabbitmq_data:/data
     ports:
       - 15674:15674
+      - 15672:15672
 
 networks:
   backend_nw:
@@ -51,3 +54,4 @@ networks:
 
 volumes:
   postgres_data:
+  rabbitmq_data:

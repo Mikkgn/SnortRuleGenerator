@@ -1,5 +1,7 @@
 import re
 import uuid
+import json
+import logging
 from typing import List, Optional, Iterable, Tuple, Any, Dict, Union
 
 from pyshark.packet.common import Pickleable
