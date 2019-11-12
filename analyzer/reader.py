@@ -8,15 +8,21 @@ from pyshark import FileCapture
 
 
 class PacketReader(abc.ABC, Process):
-    def __init__(self, queue_: Queue):
+    def __init__(self, queue_: Queue, *args: Any, **kwargs: Any):
         super().__init__()
         self._queue = queue_
         self._logger = logging.getLogger(self.__class__.__name__)
         self._stop_event = Event()
 
+    def stop_read(self, timeout: int):
+        self._logger.info(f"Остановка {self.__class__.__name__}")
+        self._stop_event.set()
+        self.join(timeout)
+        self.terminate()
+
 
 class PcapReader(PacketReader):
-    def __init__(self, filename: str, queue_: Queue):
+    def __init__(self, filename: str, queue_: Queue, *args: Any, **kwargs: Any):
         self.pcap_filename = filename
         super().__init__(queue_)
 
@@ -29,7 +35,7 @@ class PcapReader(PacketReader):
 
 
 class InterfaceReader(PacketReader):
-    def __init__(self, interface_name: str, queue_: Queue):
+    def __init__(self, interface_name: str, queue_: Queue, *args: Any, **kwargs: Any):
         self.interface_name = interface_name
         super().__init__(queue_)
 

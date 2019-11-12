@@ -7,10 +7,6 @@ root:
 disable_existing_loggers: true
 
 loggers:
-  InterfaceReader:
-    level: DEBUG
-  asyncio:
-    level: ERROR
   pika:
     level: INFO
 
