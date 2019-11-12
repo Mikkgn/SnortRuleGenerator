@@ -28,7 +28,7 @@ class AMQPConsumer(object):
     """
     EXCHANGE_TYPE = 'topic'
 
-    def __init__(self, amqp_url: str, exchange_name: str, routing_key: str, queue: str,
+    def __init__(self, host: str, user: str, password:str,  exchange_name: str, routing_key: str, queue: str,
                  callback: Callable[[Channel, Basic.Deliver, BasicProperties, Dict], None]):
         """Create a new instance of the consumer class, passing in the AMQP
         URL used to connect to RabbitMQ.
@@ -45,7 +45,9 @@ class AMQPConsumer(object):
         self._channel: Optional[Channel] = None
         self._closing = False
         self._consumer_tag = None
-        self._url = amqp_url
+        self._connection_params = pika.ConnectionParameters(host=host, port=5672, connection_attempts=20,
+                                                            credentials=pika.PlainCredentials(username=user,
+                                                                                              password=password))
         self._consuming = False
         # In production, experiment with higher prefetch values
         # for higher consumer throughput
@@ -57,12 +59,12 @@ class AMQPConsumer(object):
         will be invoked by pika.
         :rtype: pika.SelectConnection
         """
-        self._logger.info('Connecting to %s', self._url)
+        self._logger.info('Connecting to')
         return pika.SelectConnection(
-            parameters=pika.URLParameters(self._url),
+            parameters=self._connection_params,
             on_open_callback=self.on_connection_open,
             on_open_error_callback=self.on_connection_open_error,
-            on_close_callback=self.on_connection_closed)
+            on_close_callback=self.on_connection_closed, )
 
     def close_connection(self):
         self._consuming = False
@@ -359,19 +361,23 @@ class AMQPConsumer(object):
 
 class AMQPClient(Thread):
     def __init__(self, host: str, user: str, password: str):
+        self._logger = logging.getLogger(self.__class__.__name__)
         self._reconnect_delay = 0
-        self._amqp_url = f"amqp://{user}:{password}@{host}:5672/%2F"
-        self._is_stopped = Event()
+        self._host = host
+        self._user = user
+        self._password = password
+        self._stop_event = Event()
         self._consumers: List[AMQPConsumer] = []
         super().__init__(name=self.__class__.__name__)
 
     def add_consumer(self, exchange_name: str, queue: str, routing_key: str,
                      callback: Callable[[Channel, Basic.Deliver, BasicProperties, Dict], None]):
-        self._consumers.append(AMQPConsumer(self._amqp_url, exchange_name=exchange_name, queue=queue,
+        self._consumers.append(AMQPConsumer(self._host, self._user, self._password, exchange_name=exchange_name,
+                                            queue=queue,
                                             routing_key=routing_key, callback=callback))
 
     def run(self):
-        while not self._is_stopped.set():
+        while not self._stop_event.is_set():
             for consumer in self._consumers:
                 consumer.run()
             time.sleep(1)

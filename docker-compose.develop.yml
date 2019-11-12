@@ -27,6 +27,7 @@ services:
       context: .
     depends_on:
       - db
+      - rabbitmq-stomp
     network_mode: host
     volumes:
       - ${PROJECT_DIR}:/opt/
@@ -45,6 +46,30 @@ services:
     ports:
       - 15674:15674
       - 15672:15672
+      - 5672:5672
+      - 61613:61613
+    networks:
+      - backend_nw
+
+#  api:
+#    container_name: api
+#    image: michailgg/snortruleapi:latest
+#    build:
+#      dockerfile: api/Dockerfile
+#      context: .
+#    environment:
+#      DB_HOST: ${DB_HOST:-localhost}
+#      DB_USER: ${DB_USER}
+#      DB_PASS: ${DB_PASS}
+#    depends_on:
+#      - db
+#      - rabbitmq-stomp
+#    networks:
+#      - backend_nw
+#      - frontend_nw
+#    volumes:
+#      - ${PROJECT_DIR}:/opt/
+
 
 networks:
   backend_nw:

@@ -25,9 +25,10 @@ def wait_db(db_host: str, db_name: str, db_user: str, db_pass: str, attemps: int
                               )
             conn.close()
         except OperationalError as exc:
-            logger.exception(exc)
             if 'does not exist' in str(exc):
                 return
+            attemps -= 1
+            time.sleep(pause)
         except Exception as exc:
             logger.exception(
                 f'Не удалось установить соединение с БД. {exc}'
@@ -39,7 +40,7 @@ def wait_db(db_host: str, db_name: str, db_user: str, db_pass: str, attemps: int
             logger.info('Соединение с БД установлено.')
             return
     logger.error('Не установлено соединение с БД')
-    # exit(1)
+    exit(1)
 
 
 def init_db(config: Dict) -> None:

@@ -1,0 +1,41 @@
+{
+  "reader": "pcap",
+  "action": "start",
+  "home_network": "0.0.0.0/0",
+  "external_network": "0.0.0.0/0",
+  "filename": "test.pcap",
+  "definitions": [
+    {
+      "criterion": "ALL",
+      "name": "sql_injection",
+      "description": "SQL injection",
+      "id": "e5366286-e3b0-45b3-9d09-75fa69ae5a4d",
+      "signs": [
+        {
+          "result_criteria": "ALL",
+          "dst": "HOME",
+          "search_type": "REGEX",
+          "packet_type": "HTTP",
+          "order": 0,
+          "checked_fields": {
+            "request_uri": ".*union.*"
+          },
+          "src": "EXTERNAL",
+          "id": "8644851a-36b3-4a8f-be5f-afb7f82c35ca"
+        },
+        {
+          "result_criteria": "ALL",
+          "dst": "EXTERNAL",
+          "search_type": "FULL_MATCH",
+          "packet_type": "HTTP",
+          "order": 1,
+          "checked_fields": {
+            "response_code": 200
+          },
+          "src": "HOME",
+          "id": "8fae99ea-b1a1-43b0-9832-5740391eab92"
+        }
+      ]
+    }
+  ]
+}

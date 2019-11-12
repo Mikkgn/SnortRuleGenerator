@@ -11,7 +11,7 @@ from alembic import op
 # revision identifiers, used by Alembic.
 from sqlalchemy import table, column
 
-import analyzer
+import common
 
 revision = '4c752e23d09d'
 down_revision = 'd3d0753d7f43'
@@ -55,7 +55,7 @@ def seed_signs():
                         column('search_type', sa.Enum),
                         column('src', sa.Enum),
                         column('dst', sa.Enum),
-                        column('checked_fields', analyzer.db.data_types.Json),
+                        column('checked_fields', common.db.data_types.Json),
                         column('result_criteria', sa.Enum)
                         )
     signs = [

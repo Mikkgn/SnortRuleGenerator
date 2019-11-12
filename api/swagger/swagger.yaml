@@ -1,0 +1,95 @@
+openapi: 3.0.1
+info:
+  title: Snort Rule Generator Api
+  version: 0.0.1
+servers:
+- url: /
+tags:
+- name: Events
+  description: Attack events
+- name: Definitions
+  description: Definitions
+- name: Analyzer
+  description: Run or Stop traffic analyzer
+paths:
+  /events:
+    get:
+      tags:
+      - Events
+      summary: Get events
+      operationId: get_events
+      parameters:
+      - name: offset
+        in: query
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: integer
+          default: 0
+      - name: limit
+        in: query
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: integer
+          default: 20
+      responses:
+        200:
+          description: Events list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Event'
+                x-content-type: application/json
+      x-openapi-router-controller: api.controllers.events_controller
+  /analyzer/start:
+    post:
+      tags:
+      - Analyzer
+      summary: Start traffic analyzer
+      operationId: start_traffic_analyzer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StartRequest'
+      responses:
+        204:
+          description: Started successfully
+      x-openapi-router-controller: api.controllers.analyzer_controller
+  /analyzer/stop:
+    post:
+      tags:
+      - Analyzer
+      summary: Start traffic analyzer
+      operationId: stop_traffic_analyzer
+      responses:
+        204:
+          description: Stopped successfully
+      x-openapi-router-controller: api.controllers.analyzer_controller
+components:
+  schemas:
+    Event:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+      example:
+        id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+    Reader:
+      type: string
+      enum:
+      - pcap
+      - interface
+    StartRequest:
+      type: object
+      properties:
+        reader:
+          $ref: '#/components/schemas/Reader'
+      additionalProperties: true
+
