@@ -1,0 +1,40 @@
+@startuml
+PostgreSQL -[hidden]-> backend
+
+database "PostgreSQL" {
+    database events
+    database definitions {
+        database signs
+    }
+}
+
+
+package frontend {
+    [GUI]
+}
+
+package backend {
+    [Analyzer]
+    package RabbitMQ{
+        WebSocket -[hidden]-> WebSocket
+        WebSocket <-[hidden]up-> AMQP
+    }
+    [API] <-right-> HTTP
+    RabbitMQ -[hidden]up-> Analyzer
+    API -[hidden]-> RabbitMQ
+
+}
+backend -[hidden]up->PostgreSQL
+
+RabbitMQ-[hidden]up->Analyzer
+[API] -> AMQP
+AMQP -> Analyzer
+Analyzer -> events
+Analyzer -> WebSocket
+GUI <- WebSocket
+HTTP <-> GUI
+API <-> definitions
+frontend -[hidden]up-> backend
+
+
+@enduml
