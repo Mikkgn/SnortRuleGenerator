@@ -5,7 +5,7 @@ from typing import Dict, TypedDict, List
 from pyshark.packet.packet import Packet
 
 
-class EventMessage(TypedDict):
+class EventMessage(TypedDict, total=False):
     attack_id: str
     attack_definition_id: str
     sign_id: str

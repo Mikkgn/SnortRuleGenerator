@@ -30,7 +30,6 @@ class PacketType(Enum):
     HTTP = 2
     ANY = 3
 
-    @classmethod
     def tostring(cls) -> str:
         return cls.name
 
@@ -43,9 +42,8 @@ class EventType(Enum):
     SIGN_DETECTED = 0
     ATTACK_DETECTED = 1
 
-    @classmethod
-    def tostring(cls) -> str:
-        return cls.name
+    def tostring(self) -> str:
+        return self.name
 
     @classmethod
     def fromstring(cls, value: str) -> 'EventType':

@@ -45,8 +45,9 @@ class AMQPConsumer(object):
         self._channel: Optional[Channel] = None
         self._closing = False
         self._consumer_tag = None
-        self._connection_params = pika.ConnectionParameters(host=host, port=5672, connection_attempts=10,
-                                                            credentials=pika.PlainCredentials(username=user, password=password))
+        self._connection_params = pika.ConnectionParameters(host=host, port=5672, connection_attempts=20,
+                                                            credentials=pika.PlainCredentials(username=user,
+                                                                                              password=password))
         self._consuming = False
         # In production, experiment with higher prefetch values
         # for higher consumer throughput
@@ -371,7 +372,8 @@ class AMQPClient(Thread):
 
     def add_consumer(self, exchange_name: str, queue: str, routing_key: str,
                      callback: Callable[[Channel, Basic.Deliver, BasicProperties, Dict], None]):
-        self._consumers.append(AMQPConsumer(self._host, self._user, self._password, exchange_name=exchange_name, queue=queue,
+        self._consumers.append(AMQPConsumer(self._host, self._user, self._password, exchange_name=exchange_name,
+                                            queue=queue,
                                             routing_key=routing_key, callback=callback))
 
     def run(self):

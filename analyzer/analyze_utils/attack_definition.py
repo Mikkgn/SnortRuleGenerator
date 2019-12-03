@@ -14,7 +14,7 @@ class AttackDefinition(object):
         self._is_detected = False
         self.attack_unique_id = uuid.uuid4()
         self._definition = definition
-        self._reset_founded_signs()
+        self.reset_founded_signs()
 
     def __getitem__(self, item):
         return self._definition[item]
@@ -31,20 +31,17 @@ class AttackDefinition(object):
             if not sign.is_detected:
                 return False
         else:
-            self._reset_founded_signs()
+            self.reset_founded_signs()
             return True
 
-    def process_packet(self, packet: Packet, *args: Any, **kwargs: Any) -> bool:
+    def process_packet(self, packet: Packet, *args: Any, **kwargs: Any) -> AnalyzeResult:
         for sign in self._signs:
             if not sign.is_detected:
-                result = sign.analyze_packet(packet, *args, **kwargs)
-                if result != AnalyzeResult.DETECTED:
-                    self._reset_founded_signs()
-                return result == AnalyzeResult.DETECTED
+                return sign.analyze_packet(packet, *args, **kwargs)
         else:
             raise RuntimeError()
 
-    def _reset_founded_signs(self):
+    def reset_founded_signs(self):
         self.attack_unique_id = uuid.uuid4()
         for sign in self._signs:
             sign.reset(self.attack_unique_id)

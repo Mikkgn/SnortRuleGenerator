@@ -12,7 +12,7 @@ from pyshark.packet.packet import Packet
 
 from analyzer.analyze_utils.attack_definition import AttackDefinition
 from analyzer.analyze_utils.attack_sign import AttackSign
-from analyzer.analyze_utils.models import EventMessage, packet_to_dict, packet_to_str
+from analyzer.analyze_utils.models import EventMessage, packet_to_dict, packet_to_str, AnalyzeResult
 from analyzer.config import configuration
 from analyzer.db.models import Message
 from common.db.engine import create_scoped_session
@@ -27,7 +27,7 @@ class PacketAnalyzer(Process):
         self._scoped_session = create_scoped_session(configuration["db_config"])
         self._home_network = home_network
         self._external_network = external_network
-        self._definitions: List[DefinitionWrapper] = definitions
+        self._definitions: List[AttackDefinition] = definitions
         self._stop_event = ProcEvent()
         self._packets_cache: Deque[Packet] = deque([])
         self._cache_limit = configuration['cache_limit']
@@ -35,6 +35,7 @@ class PacketAnalyzer(Process):
         super().__init__(name=self.__class__.__name__)
 
     def run(self):
+        self._logger.info(f"Запуск {self.__class__.__name__}")
         while not self._stop_event.is_set():
             try:
                 packet = self._queue.get_nowait()
@@ -43,6 +44,7 @@ class PacketAnalyzer(Process):
             except Exception as exc:
                 self._logger.exception(exc)
             else:
+                self._logger.info(packet_to_str(packet))
                 self.analyze_packet(packet)
                 self._add_to_cache(packet)
 
@@ -59,9 +61,9 @@ class PacketAnalyzer(Process):
     def analyze_packet(self, packet: Packet) -> None:
         future_to_sign_map: Dict[Future, Tuple[AttackDefinition, Packet]] = {}
         worker_list = []
-        with ProcessPoolExecutor(max_workers=4) as worker:
+        with ProcessPoolExecutor(max_workers=1) as worker:
             for definition in self._definitions:
-                fut = worker.submit(definition.process_packet, definition.current_sign, packet,
+                fut = worker.submit(definition.process_packet, packet,
                                     self._home_network, self._external_network)
                 future_to_sign_map[fut] = (definition, packet)
                 worker_list.append(fut)
@@ -69,8 +71,11 @@ class PacketAnalyzer(Process):
                 definition, packet = future_to_sign_map[future]
                 self._logger.debug(f"Analyzed {packet_to_str(packet)}")
                 result = future.result()
-                if result is True:
+                if result == AnalyzeResult.NOT_DETECTED:
+                    definition.reset_founded_signs()
+                if result == AnalyzeResult.DETECTED:
                     self._send_event(EventType.SIGN_DETECTED, packet, sign=definition.current_sign)
+                    definition.current_sign.mark_as_detected(packet)
                 if definition.is_attack_detected():
                     self._logger.warning(f"Attack detected")
                     self._send_event(EventType.ATTACK_DETECTED, packet, definition=definition)
@@ -79,11 +84,12 @@ class PacketAnalyzer(Process):
                     definition: Optional[AttackDefinition] = None):
         if sign is not None:
             event_message = EventMessage(sign_id=sign['id'], packet=packet_to_dict(packet),
-                                         attack_id=sign.attack_unique_id, previous_packets=self._packets_cache,
+                                         attack_id=str(sign.attack_unique_id),
+                                         previous_packets=[packet_to_dict(p) for p in self._packets_cache],
                                          event_type=event_type.tostring())
         elif definition is not None:
-            event_message = EventMessage(attack_id=definition.attack_unique_id,
-                                         event_type=event_type.tostring(), attack_definition_id=definition['id'])
+            event_message = EventMessage(attack_id=str(definition.attack_unique_id),
+                                         event_type=event_type.tostring(), attack_definition_id=str(definition['id']))
         else:
             return
         message = Message(id=uuid.uuid4(), message=event_message)

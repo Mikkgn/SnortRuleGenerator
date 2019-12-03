@@ -1,3 +1,4 @@
+import logging
 import re
 import uuid
 from typing import TypedDict, Dict, Optional, Any, Union, List
@@ -8,6 +9,7 @@ from pyshark.packet.packet import Packet
 from analyzer.analyze_utils.models import AnalyzeResult
 from common.enum_types import SearchType, Criterion
 
+logger = logging.getLogger(__name__)
 
 class SignInterface(TypedDict, total=False):
     src: str
@@ -44,9 +46,9 @@ class AttackSign:
 
     @property
     def criterion(self) -> Criterion:
-        return Criterion.fromstring(self['criterion'])
+        return Criterion.fromstring(self['result_criteria'])
 
-    def _mark_as_detected(self, packet: Packet) -> None:
+    def mark_as_detected(self, packet: Packet) -> None:
         """
         Mark sign as detected and assign packet
         :param packet:
@@ -83,7 +85,6 @@ class AttackSign:
                 return AnalyzeResult.IP_NOT_IN_NETWORK
             result = self._check_fields(packet)
             if result is True:
-                self._mark_as_detected(packet)
                 return AnalyzeResult.DETECTED
             return AnalyzeResult.NOT_DETECTED
         else:
@@ -96,7 +97,9 @@ class AttackSign:
         :return:
         """
         summary_check_result = []
-        for key, value in self['search_keys'].items():
+
+        logger.info(self._sign)
+        for key, value in self['checked_fields'].items():
             search_value = getattr(packet[self['packet_type']], key, None)
             if search_value is not None:
                 summary_check_result.append(self._is_value_satisfies_condition(value, search_value))
