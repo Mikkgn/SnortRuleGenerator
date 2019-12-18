@@ -1,15 +1,17 @@
-<mat-toolbar class="navigation" color="primary">
-    <span>RuleGenerator</span>
-    <button mat-button>
-        <mat-icon>play_arrow</mat-icon>
-        <span>Analyzer control</span>
-    </button>
-    <button mat-button>
-        <mat-icon>warning</mat-icon>
-        <span>Events</span>
-    </button>
-    <button mat-button>
-        <mat-icon>settings_applications</mat-icon>
-        <span>Definitions</span>
-    </button>
-</mat-toolbar>
+<div class="navigation" >
+    <mat-toolbar color="primary">
+        <span>RuleGenerator </span>
+        <button mat-button [routerLink]="['/analyzer_control']">
+            <mat-icon>play_arrow</mat-icon>
+            <span> Analyzer control</span>
+        </button>
+        <button mat-button [routerLink]="['/events']">
+            <mat-icon>warning</mat-icon>
+            <span> Events</span>
+        </button>
+        <button mat-button [routerLink]="['/definitions']">
+            <mat-icon>settings_applications</mat-icon>
+            <span> Definitions</span>
+        </button>
+    </mat-toolbar>
+</div>

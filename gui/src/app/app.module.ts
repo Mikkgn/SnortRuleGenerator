@@ -3,16 +3,21 @@ import {BrowserModule} from '@angular/platform-browser';
 
 import {AppRoutingModule} from './app-routing.module';
 import {AppComponent} from './app.component';
-import {StompConfig, StompService} from "@stomp/ng2-stompjs";
+import {StompConfig, StompService} from '@stomp/ng2-stompjs';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {NavigationComponent} from './navigation/navigation.component';
-import {MatMenuModule} from "@angular/material/menu";
-import {FormsModule, ReactiveFormsModule} from "@angular/forms";
-import {HttpClientModule} from "@angular/common/http";
-import {platformBrowserDynamic} from "@angular/platform-browser-dynamic";
-import {MatIconModule} from "@angular/material/icon";
-import {MatButtonModule} from "@angular/material/button";
-import {MatToolbarModule} from "@angular/material/toolbar";
+import {MatMenuModule} from '@angular/material/menu';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {HttpClientModule} from '@angular/common/http';
+import {platformBrowserDynamic} from '@angular/platform-browser-dynamic';
+import {MatIconModule} from '@angular/material/icon';
+import {MatButtonModule} from '@angular/material/button';
+import {MatToolbarModule} from '@angular/material/toolbar';
+import { DefinitionsComponent } from './definitions/definitions.component';
+import {RouterModule} from '@angular/router';
+import {MatTableModule} from '@angular/material/table';
+import { AnalyzerControlComponent } from './analyzer-control/analyzer-control.component';
+import { EventsComponent } from './events/events.component';
 
 const stompConfig: StompConfig = {
     // Which server?
@@ -42,7 +47,10 @@ const stompConfig: StompConfig = {
 @NgModule({
     declarations: [
         AppComponent,
-        NavigationComponent
+        NavigationComponent,
+        DefinitionsComponent,
+        AnalyzerControlComponent,
+        EventsComponent,
     ],
     imports: [
         BrowserModule,
@@ -54,7 +62,9 @@ const stompConfig: StompConfig = {
         MatMenuModule,
         MatIconModule,
         MatButtonModule,
-        MatToolbarModule
+        MatToolbarModule,
+        RouterModule,
+        MatTableModule
     ],
     providers: [
         StompService,

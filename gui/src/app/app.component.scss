@@ -2,4 +2,8 @@
 @import '~@angular/material/theming';
 
 @include mat-core();
-$primary: mat-palette($mat-indigo)
+$primary: mat-palette($mat-indigo);
+
+.container {
+    margin-top: 64px;
+}

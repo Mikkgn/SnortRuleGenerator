@@ -1,0 +1,43 @@
+.definitions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: auto;
+    padding: 30px 50px 50px 50px;
+}
+.definitions-control {
+    margin: auto;
+    padding-top: 30px;
+    padding-left: 50px;
+}
+table {
+    width: 100%;
+}
+
+tr.detail-row {
+    height: 0;
+}
+
+tr.element-row:not(.expanded-row):hover {
+    background: #777;
+}
+
+tr.element-row:not(.expanded-row):active {
+    background: #efefef;
+}
+
+.element-row td {
+    border-bottom-width: 0;
+}
+
+.element-detail {
+    overflow: hidden;
+    display: flex;
+}
+.element-description {
+    padding: 16px;
+}
+
+.header {
+    margin-top: 64px;
+}
