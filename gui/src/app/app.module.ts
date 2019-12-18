@@ -18,6 +18,8 @@ import {RouterModule} from '@angular/router';
 import {MatTableModule} from '@angular/material/table';
 import { AnalyzerControlComponent } from './analyzer-control/analyzer-control.component';
 import { EventsComponent } from './events/events.component';
+import {MatCardModule} from "@angular/material/card";
+import {MatBadgeModule} from "@angular/material/badge";
 
 const stompConfig: StompConfig = {
     // Which server?
@@ -64,7 +66,9 @@ const stompConfig: StompConfig = {
         MatButtonModule,
         MatToolbarModule,
         RouterModule,
-        MatTableModule
+        MatTableModule,
+        MatCardModule,
+        MatBadgeModule
     ],
     providers: [
         StompService,
