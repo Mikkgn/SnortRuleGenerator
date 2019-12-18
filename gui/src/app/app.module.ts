@@ -4,6 +4,15 @@ import {BrowserModule} from '@angular/platform-browser';
 import {AppRoutingModule} from './app-routing.module';
 import {AppComponent} from './app.component';
 import {StompConfig, StompService} from "@stomp/ng2-stompjs";
+import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
+import {NavigationComponent} from './navigation/navigation.component';
+import {MatMenuModule} from "@angular/material/menu";
+import {FormsModule, ReactiveFormsModule} from "@angular/forms";
+import {HttpClientModule} from "@angular/common/http";
+import {platformBrowserDynamic} from "@angular/platform-browser-dynamic";
+import {MatIconModule} from "@angular/material/icon";
+import {MatButtonModule} from "@angular/material/button";
+import {MatToolbarModule} from "@angular/material/toolbar";
 
 const stompConfig: StompConfig = {
     // Which server?
@@ -32,11 +41,20 @@ const stompConfig: StompConfig = {
 
 @NgModule({
     declarations: [
-        AppComponent
+        AppComponent,
+        NavigationComponent
     ],
     imports: [
         BrowserModule,
         AppRoutingModule,
+        BrowserAnimationsModule,
+        FormsModule,
+        HttpClientModule,
+        ReactiveFormsModule,
+        MatMenuModule,
+        MatIconModule,
+        MatButtonModule,
+        MatToolbarModule
     ],
     providers: [
         StompService,
@@ -45,7 +63,14 @@ const stompConfig: StompConfig = {
             useValue: stompConfig
         }
     ],
-    bootstrap: [AppComponent]
+    bootstrap: [
+        AppComponent,
+        NavigationComponent
+    ],
+    entryComponents: [NavigationComponent]
 })
 export class AppModule {
 }
+
+platformBrowserDynamic().bootstrapModule(AppModule)
+    .catch(err => console.error(err));
