@@ -14,9 +14,9 @@ from analyzer.analyze_utils.attack_definition import AttackDefinition
 from analyzer.analyze_utils.attack_sign import AttackSign
 from analyzer.analyze_utils.models import EventMessage, packet_to_dict, packet_to_str, AnalyzeResult
 from analyzer.config import configuration
-from analyzer.db.models import Message
 from common.db.engine import create_scoped_session
 from common.enum_types import EventType
+from common.message_publisher import Message
 
 
 class PacketAnalyzer(Process):
@@ -35,7 +35,7 @@ class PacketAnalyzer(Process):
         super().__init__(name=self.__class__.__name__)
 
     def run(self):
-        self._logger.info(f"Запуск {self.__class__.__name__}")
+        self._logger.info(f"Starting {self.__class__.__name__}")
         while not self._stop_event.is_set():
             try:
                 packet = self._queue.get_nowait()
@@ -59,6 +59,9 @@ class PacketAnalyzer(Process):
             self._packets_cache.popleft()
 
     def analyze_packet(self, packet: Packet) -> None:
+        """
+
+        """
         future_to_sign_map: Dict[Future, Tuple[AttackDefinition, Packet]] = {}
         worker_list = []
         with ProcessPoolExecutor(max_workers=1) as worker:
@@ -82,19 +85,22 @@ class PacketAnalyzer(Process):
 
     def _send_event(self, event_type: EventType, packet: Packet, sign: Optional[AttackSign] = None,
                     definition: Optional[AttackDefinition] = None):
+        """
+        Function add Event Message to DB for RabbitMQ queue
+        """
         if sign is not None:
             event_message = EventMessage(sign_id=sign['id'], packet=packet_to_dict(packet),
                                          attack_id=str(sign.attack_unique_id),
-                                         previous_packets=[packet_to_dict(p) for p in self._packets_cache],
                                          event_type=event_type.tostring())
         elif definition is not None:
             event_message = EventMessage(attack_id=str(definition.attack_unique_id),
                                          event_type=event_type.tostring(), attack_definition_id=str(definition['id']))
         else:
             return
-        message = Message(id=uuid.uuid4(), message=event_message)
+        message = Message(id=uuid.uuid4(), data=event_message, routing_key='event.created')
         self._scoped_session.add(message)
         self._scoped_session.commit()
 
     def stop(self):
+        self._logger.info(f"Stopping {self.__class__.__name__}")
         self._stop_event.set()

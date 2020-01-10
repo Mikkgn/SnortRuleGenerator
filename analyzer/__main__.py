@@ -6,7 +6,7 @@ from common.db.engine import wait_db, init_db, create_scoped_session
 
 def main():
     wait_db(**configuration["db_config"])
-    init_db(configuration["db_config"])
+    init_db(configuration["db_config"], 'analyzer')
     # import sys
     # sys.path.append('./pydevd-pycharm.egg')
     # import pydevd_pycharm
