@@ -1,1 +1,35 @@
-<p>events works!</p>
+<mat-toolbar class="header" color="primary">
+    <span class="mat-h1">Events</span>
+</mat-toolbar>
+<div class="definitions">
+    <table mat-table [dataSource]="events" multiTemplateDataRows class="mat-elevation-z8">
+        <ng-container matColumnDef="sign_name" sticky>
+            <th mat-header-cell *matHeaderCellDef> Definition name</th>
+            <td mat-cell *matCellDef="let element"> {{element.sign.name}} </td>
+        </ng-container>
+        <ng-container matColumnDef="created_at" sticky>
+            <th mat-header-cell *matHeaderCellDef> Detected time </th>
+            <td mat-cell *matCellDef="let element"> {{element.created_at | date: 'short'}} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="expandedDetail">
+            <td mat-cell *matCellDef="let element" [attr.colspan]="columnsToDisplay.length">
+                <div class="element-detail"
+                     [@detailExpand]="element == expandedElement ? 'expanded' : 'collapsed'">
+                    <div class="element-description">
+                        <b>sign:</b> <p [innerHTML]="element.sign | prettyprint">
+                        <b>packet:</b> <p [innerHTML]="element.packet | prettyprint">
+                    </div>
+                </div>
+            </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>
+        <tr mat-row *matRowDef="let element; columns: columnsToDisplay;"
+            class="element-row"
+            [class.expanded-row]="expandedElement === element"
+            (click)="expandedElement = expandedElement === element ? null : element">
+        </tr>
+        <tr mat-row *matRowDef="let row; columns: ['expandedDetail']" class="detail-row"></tr>
+    </table>
+</div>

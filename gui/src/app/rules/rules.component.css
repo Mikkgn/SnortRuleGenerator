@@ -42,3 +42,7 @@ tr.element-row:not(.expanded-row):active {
 .header {
     margin-top: 64px;
 }
+
+.buttons {
+    margin: 5px;
+}

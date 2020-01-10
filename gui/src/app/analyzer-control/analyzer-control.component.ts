@@ -1,21 +1,24 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
+import {AnalyzerControlService} from "../services/analyzer-control.service";
 
 @Component({
-  selector: 'app-analyzer-control',
-  templateUrl: './analyzer-control.component.html',
-  styleUrls: ['./analyzer-control.component.scss']
+    selector: 'app-analyzer-control',
+    templateUrl: './analyzer-control.component.html',
+    styleUrls: ['./analyzer-control.component.scss']
 })
 export class AnalyzerControlComponent implements OnInit {
 
     currentState = {
-        state: 'ACTIVE',
-        mode: 'interface',
-        params: 'eth0'
+        status: 'DISABLED'
     };
 
-  constructor() { }
+    constructor(private analyzerControlService: AnalyzerControlService) {
+    }
 
-  ngOnInit() {
-  }
+    ngOnInit() {
+        this.analyzerControlService.getStatusAnalyzer().subscribe(res => {
+            this.currentState = res;
+        })
+    }
 
 }

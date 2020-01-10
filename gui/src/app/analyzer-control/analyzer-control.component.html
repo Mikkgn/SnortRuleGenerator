@@ -8,9 +8,9 @@
                 Current state
             </mat-card-title>
             <mat-card-content>
-                <span *ngIf="currentState.state === 'ACTIVE'">
+                <span *ngIf="currentState.status === 'ACTIVE'">
                     <mat-icon color="warn">lens</mat-icon>
-                    {{currentState.state}}
+                    {{currentState.status}}
                 </span>
             </mat-card-content>
         </mat-card>

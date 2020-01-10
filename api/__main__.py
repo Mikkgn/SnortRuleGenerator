@@ -15,6 +15,14 @@ from common.db.engine import create_scoped_session, init_db, wait_db
 
 logger = logging.getLogger(__name__)
 
+def add_cors_header(response):
+    if response.headers.get('Access-Control-Allow-Origin', None) is None:
+        response.headers.add('Access-Control-Allow-Origin', '*')
+    if response.headers.get('Access-Control-Allow-Methods', None) is None:
+        response.headers.add('Access-Control-Allow-Methods', 'GET,POST,PATCH,PUT,DELETE,OPTIONS')
+    if response.headers.get('Access-Control-Allow-Headers', None) is None:
+        response.headers.add('Access-Control-Allow-Headers', 'Content-Type, X-Auth-Token, authorization')
+    return response
 
 def main():
     app = connexion.App(__name__, specification_dir='./swagger/')
@@ -34,6 +42,7 @@ def main():
     app.app.scoped_session = create_scoped_session(configuration['db_config'])
     app.app.register_error_handler(NoResultFound, no_result_found)
     app.app.teardown_appcontext(shutdown_session)
+    app.app.after_request(add_cors_header)
     app.app.register_error_handler(Exception, internal_server_error)
     app.add_api('swagger.yaml', arguments={'title': 'Snort Rule Generator Api'}, pythonic_params=True)
     app.run(port=8080)

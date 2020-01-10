@@ -4,6 +4,7 @@ import {MatMenuModule} from '@angular/material/menu';
 import {DefinitionsComponent} from './definitions/definitions.component';
 import {EventsComponent} from './events/events.component';
 import {AnalyzerControlComponent} from './analyzer-control/analyzer-control.component';
+import {RulesComponent} from "./rules/rules.component";
 
 const routes: Routes = [
     {
@@ -17,6 +18,10 @@ const routes: Routes = [
     {
         path: 'analyzer_control',
         component: AnalyzerControlComponent
+    },
+    {
+        path: 'rules',
+        component: RulesComponent
     }
 ];
 

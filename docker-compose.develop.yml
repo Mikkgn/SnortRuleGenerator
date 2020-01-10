@@ -105,6 +105,7 @@ services:
       - /opt/gui/node_modules
     ports:
       - 80:4200
+    command: ["ng", "serve", "--host", "0.0.0.0", "--poll", "100", "--sourceMap", "true", "--disableHostCheck"]
 
 networks:
   backend_nw:

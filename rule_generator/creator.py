@@ -54,7 +54,7 @@ class RuleCreator(AMQPClient):
                 _, value = checked_field.popitem()
                 contents.append(f'content: "{value}";')
         pcre_string = '|'.join(regex_patterns)
-        content = f'{" ".join(contents)}; pcre:"{pcre_string}"; sid: {str(self._sid_count)}'
+        content = f'{" ".join(contents)}; pcre:"{pcre_string}/i"; sid: {str(self._sid_count)}'
         return content
 
     def _get_src_and_destination(self, sign: t.Dict) -> t.Tuple[str, str]:

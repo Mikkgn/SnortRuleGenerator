@@ -1,5 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {animate, state, style, transition, trigger} from '@angular/animations';
+import {SignsService} from "../services/signs.service";
 
 @Component({
     selector: 'app-definitions',
@@ -15,19 +16,22 @@ import {animate, state, style, transition, trigger} from '@angular/animations';
 })
 export class DefinitionsComponent implements OnInit {
 
-    definitions: { id: number, name: string }[] = [
-        {id: 1, name: 'test1'}, {id: 2, name: 'test'}
-    ];
+    signs: {}[] = [];
     columnsToDisplay: string[] = [
         'name',
-        'description'
+        'src',
+        'dst',
+        'result_criteria'
     ];
     expandedElement: any | null;
 
-    constructor() {
+    constructor(private signsService: SignsService) {
     }
 
     ngOnInit() {
+        this.signsService.getSigns().subscribe(res => {
+            this.signs = res;
+        })
     }
 
 }
