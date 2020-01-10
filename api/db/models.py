@@ -60,3 +60,18 @@ class Rule(Base):
 
     number = Column(Integer, primary_key=True, autoincrement=True)
     body = Column(String, nullable=False)
+
+
+class AnalyzerEnumStatus(Enum):
+    ACTIVE = 'ACTIVE'
+    DISABLED = 'DISABLED'
+
+    @classmethod
+    def fromstr(cls, value: str) -> 'AnalyzerEnumStatus':
+        return cls[value.upper()]
+
+
+class AnalyzerStatus(Base):
+    __tablename__ = 'analyzer_status'
+    status = Column(EnumField(AnalyzerEnumStatus), nullable=False, default=AnalyzerEnumStatus.DISABLED,
+                    primary_key=True)

@@ -3,6 +3,7 @@ from typing import Dict
 from connexion import NoContent
 from flask import current_app
 
+from api.db.models import AnalyzerStatus
 from common.amqp_publisher import AMQPPublisher
 
 
@@ -26,3 +27,7 @@ def stop_traffic_analyzer():  # noqa: E501
     publisher: AMQPPublisher = current_app.amqp_publisher
     publisher.publish('listener', 'action', {'action': 'stop'})
     return 204
+
+
+def get_analyzer_status():
+    return current_app.scoped_session.query(AnalyzerStatus).one()

@@ -12,7 +12,7 @@ loggers:
   asyncio:
     level: ERROR
   pika:
-    level: INFO
+    level: ERROR
 
 
 handlers:

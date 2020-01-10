@@ -8,8 +8,8 @@ services:
     networks:
       - backend_nw
     environment:
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASS}
+      POSTGRES_USER: ${DB_USER:-root}
+      POSTGRES_PASSWORD: ${DB_PASS:-P@ssw0rd}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
@@ -19,9 +19,10 @@ services:
     container_name: analyzer
     image: michailgg/snortrulegenerator-analyzer:latest
     environment:
-      DB_HOST: ${DB_HOST:-localhost}
-      DB_USER: ${DB_USER}
-      DB_PASS: ${DB_PASS}
+      RABBITMQ_HOST: ${RABBITMQ_HOST:-localhost}
+      RABBITMQ_USER: ${RABBITMQ_USER:-root}
+      RABBITMQ_PASS: ${RABBITMQ_PASS:-P@ssword}
+      TZ: ${TZ}
     build:
       dockerfile: analyzer/Dockerfile
       context: .
@@ -31,6 +32,9 @@ services:
     network_mode: host
     volumes:
       - ${PROJECT_DIR}:/opt/
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
 
   rabbitmq-stomp:
     container_name: rabbitmq
@@ -59,8 +63,9 @@ services:
       context: .
     environment:
       DB_HOST: ${DB_HOST:-db}
-      DB_USER: ${DB_USER}
-      DB_PASS: ${DB_PASS}
+      DB_USER: ${DB_USER:-root}
+      DB_PASS: ${DB_PASS:-P@ssw0rd}
+      TZ: ${TZ}
     depends_on:
       - db
       - rabbitmq-stomp

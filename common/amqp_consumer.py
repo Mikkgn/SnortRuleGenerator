@@ -46,6 +46,7 @@ class AMQPConsumer(object):
         self._closing = False
         self._consumer_tag = None
         self._connection_params = pika.ConnectionParameters(host=host, port=5672, connection_attempts=20,
+                                                            heartbeat=0,
                                                             credentials=pika.PlainCredentials(username=user,
                                                                                               password=password))
         self._consuming = False
@@ -167,6 +168,7 @@ class AMQPConsumer(object):
         self._channel.exchange_declare(
             exchange=exchange_name,
             exchange_type=self.EXCHANGE_TYPE,
+            durable=True,
             callback=cb)
 
     def on_exchange_declareok(self, _unused_frame: Method, userdata: str):
@@ -286,8 +288,8 @@ class AMQPConsumer(object):
         try:
             data = json.loads(body)
         except Exception as exc:
-            self._logger.exception(exc)
-            self._channel.basic_nack(basic_deliver.delivery_tag)
+            self._logger.exception(f"exception while decode data {exc}")
+            _unused_channel.basic_reject(basic_deliver.delivery_tag, requeue=False)
         else:
             self._callback(_unused_channel, basic_deliver, properties, data)
             self.acknowledge_message(basic_deliver.delivery_tag)
@@ -377,8 +379,13 @@ class AMQPClient(Thread):
                                             routing_key=routing_key, callback=callback))
 
     def run(self):
+        self._logger.info(f"Starting {self.__class__.__name__}")
         while not self._stop_event.is_set():
             for consumer in self._consumers:
                 consumer.run()
             time.sleep(1)
+
+    def stop(self):
+        self._stop_event.set()
+        self.join(5)
 

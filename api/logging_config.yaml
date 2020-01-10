@@ -16,7 +16,7 @@ loggers:
   alembic:
     level: INFO
   pika:
-    level: INFO
+    level: ERROR
 
 handlers:
   console:

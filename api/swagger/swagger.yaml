@@ -43,9 +43,10 @@ paths:
               schema:
                 type: array
                 items:
-                  type: object
+                  $ref: '#/components/schemas/Event'
                 x-content-type: application/json
       x-openapi-router-controller: api.controllers.events_controller
+
   /analyzer/start:
     post:
       tags:
@@ -62,6 +63,7 @@ paths:
         204:
           description: Started successfully
       x-openapi-router-controller: api.controllers.analyzer_controller
+
   /analyzer/stop:
     post:
       tags:
@@ -71,6 +73,25 @@ paths:
       responses:
         204:
           description: Stopped successfully
+      x-openapi-router-controller: api.controllers.analyzer_controller
+
+  /analyzer/status:
+    get:
+      tags:
+        - Analyzer
+      summary: get status of traffic analyzer
+      operationId: get_analyzer_status
+      responses:
+        200:
+          description: Status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    description: status of analyzer
       x-openapi-router-controller: api.controllers.analyzer_controller
 
   /rules:
@@ -175,8 +196,21 @@ components:
         id:
           type: string
           format: uuid
+        created_at:
+          type: string
+        packet:
+          type: object
+        sign_id:
+          type: string
+          format: uuid
+        sign:
+          type: object
       example:
         id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        created_at: 2020-01-10T14:09:51.162765Z
+        packet: {}
+        sign_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        sign: {}
     Reader:
       type: string
       enum:

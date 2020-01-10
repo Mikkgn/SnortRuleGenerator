@@ -42,6 +42,11 @@ def upgrade():
                     sa.Column('body', sa.String(), nullable=False),
                     sa.PrimaryKeyConstraint('number')
                     )
+    op.create_table('analyzer_status',
+                    sa.Column('status', sa.Enum('ACTIVE', 'DISABLED', name='analyzerenumstatus'), nullable=False),
+                    sa.PrimaryKeyConstraint('status')
+                    )
+    op.bulk_insert(sa.table('analyzer_status', sa.Column('status', sa.Enum)), [{'status': 'DISABLED'}])
     op.create_index(op.f('ix_attack_events_created_at'), 'attack_events', ['created_at'], unique=False)
     op.create_index(op.f('ix_attack_events_sign_id'), 'attack_events', ['sign_id'], unique=False)
 

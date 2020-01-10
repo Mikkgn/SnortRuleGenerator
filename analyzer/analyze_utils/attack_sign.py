@@ -1,7 +1,7 @@
 import logging
 import re
-import uuid
-from typing import TypedDict, Dict, Optional, Any, Union, List
+from copy import deepcopy
+from typing import TypedDict, Dict, Optional, Any, Union, List, Literal
 
 from pyshark.packet.fields import LayerFieldsContainer
 from pyshark.packet.packet import Packet
@@ -11,63 +11,36 @@ from common.enum_types import SearchType, Criterion
 
 logger = logging.getLogger(__name__)
 
+
 class SignInterface(TypedDict, total=False):
     src: str
     dst: str
     id: str
+    name: str
     packet_type: str
-    search_type: str
     checked_fields: Dict
     result_criteria: str
-    order: int
+
+
+SignInterfaceKeys = Literal['src', 'dst', 'id', 'name', 'packet_type', 'checked_fields', 'result_criteria']
 
 
 class AttackSign:
-    def __init__(self, definition_id: str, **kwargs: Any):
-        self._definition_id = definition_id
+    def __init__(self, **kwargs: Dict[str, Any]):
         self._sign: SignInterface = {}
-        self.attack_unique_id: Optional[uuid.UUID] = None
-        self._detected = False
-        self._packet: Optional[Packet] = None
-        self._timestamp: Optional[int] = None
         for key, value in kwargs.items():
             self._sign[key] = value
 
-    def __getitem__(self, key: str):
+    def __getitem__(self, key: SignInterfaceKeys):
         return self._sign[key]
 
     @property
-    def is_detected(self) -> bool:
-        return self._detected
+    def name(self) -> str:
+        return self._sign['name']
 
     @property
-    def search_type(self) -> SearchType:
-        return SearchType.fromstring(self['search_type'])
-
-    @property
-    def criterion(self) -> Criterion:
+    def _criterion(self) -> Criterion:
         return Criterion.fromstring(self['result_criteria'])
-
-    def mark_as_detected(self, packet: Packet) -> None:
-        """
-        Mark sign as detected and assign packet
-        :param packet:
-        :return:
-        """
-        self._detected = True
-        self._packet = packet
-        self._timestamp = packet.sniff_time
-
-    def reset(self, attack_id: uuid.UUID) -> None:
-        """
-        Reset
-        :param attack_id:
-        :return:
-        """
-        self.attack_unique_id = attack_id
-        self._detected = False
-        self._packet = None
-        self._timestamp = None
 
     def analyze_packet(self, packet: Packet, home_net: str, external_net: str,
                        *args: Any, **kwargs: Any) -> AnalyzeResult:
@@ -99,18 +72,21 @@ class AttackSign:
         summary_check_result = []
 
         logger.info(self._sign)
-        for key, value in self['checked_fields'].items():
-            search_value = getattr(packet[self['packet_type']], key, None)
-            if search_value is not None:
-                summary_check_result.append(self._is_value_satisfies_condition(value, search_value))
-            else:
-                return False
+        for field in self['checked_fields']:
+            checked_field = deepcopy(field)
+            search_type = SearchType.fromstring(checked_field.pop('search_type'))
+            for key, value in checked_field.items():
+                search_value = getattr(packet[self['packet_type']], key, None)
+                if search_value is not None:
+                    summary_check_result.append(self._is_value_satisfies_condition(value, search_type, search_value))
+                else:
+                    return False
         if summary_check_result:
             return self._evaluate_result(summary_check_result)
         else:
             return False
 
-    def _is_value_satisfies_condition(self, search_value: Union[str, int],
+    def _is_value_satisfies_condition(self, search_value: Union[str, int], search_type: SearchType,
                                       value: Optional[LayerFieldsContainer] = None) -> bool:
         """
         Check packet field value to equality sign field
@@ -121,14 +97,18 @@ class AttackSign:
         if value is None:
             return False
         datatype = type(search_value)
-        if self.search_type == SearchType.REGEX and isinstance(search_value, str):
+        if search_type == SearchType.REGEX:
+            if not isinstance(search_value, str):
+                raise ValueError(f"Значение не является строкой")
             pattern = re.compile(search_value)
             if len(pattern.findall(value)):
                 return True
-        if self.search_type == SearchType.FULL_MATCH:
+            else:
+                return False
+        elif search_type == SearchType.FULL_MATCH:
             return datatype(value) == search_value
         else:
-            raise ValueError(f"Указан неизвестный тип сравнения {self.search_type.name}")
+            raise ValueError(f"Указан неизвестный тип сравнения {search_type.name}")
 
     def is_net_includes(self, packet: Packet, home_net: str, external_net: str):
         """
@@ -147,18 +127,18 @@ class AttackSign:
 
     def _evaluate_result(self, check_result: List[bool]) -> bool:
         true_count = sum(check_result)
-        if self.criterion == Criterion.AT_LEAST_ONE:
+        if self._criterion == Criterion.AT_LEAST_ONE:
             if true_count >= 1:
                 return True
             else:
                 return False
-        elif self.criterion == Criterion.ALL:
+        elif self._criterion == Criterion.ALL:
             if true_count == len(check_result):
                 return True
             else:
                 return False
         else:
-            raise ValueError(f"Указан неизвестный тип {self.criterion}")
+            raise ValueError(f"Указан неизвестный тип {self._criterion}")
 
 
 def is_net_include_ip(ipv4_address, netmask, home_net, external_net):

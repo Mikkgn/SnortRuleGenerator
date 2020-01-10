@@ -1,11 +1,10 @@
 import os
 
 configuration = {
-    "db_config": {
-        'db_host': os.environ.get('DB_HOST', 'localhost'),
-        'db_user': os.environ.get('DB_USER', 'root'),
-        'db_pass': os.environ.get('DB_PASS', 'P@ssw0rd'),
-        'db_name': 'analyzer',
+    "rabbitmq_config": {
+        'host': os.environ.get('RABBITMQ_HOST', '192.168.99.100`'),
+        'user': os.environ.get('RABBIMTQ_USER', 'root'),
+        'password': os.environ.get('RABBITMQ_PASS', 'P@ssword')
     },
     "cache_limit": 50,
 }

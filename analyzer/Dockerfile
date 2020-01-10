@@ -43,6 +43,6 @@ FROM stage0 as final_stage
 COPY analyzer /opt/analyzer
 COPY common /opt/common
 
-USER analyzer
+USER root
 
 CMD ["python", "-m", "analyzer"]

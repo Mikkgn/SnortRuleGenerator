@@ -14,7 +14,7 @@ class AMQPPublisher(object):
         self._connection = None
         self._channel: t.Optional[pika.adapters.blocking_connection.BlockingChannel] = None
         self._logger = logging.getLogger(self.__class__.__name__)
-        self._connection_params = pika.ConnectionParameters(host=host, port=5672, connection_attempts=20,
+        self._connection_params = pika.ConnectionParameters(host=host, heartbeat=0, port=5672, connection_attempts=20,
                                                             credentials=pika.PlainCredentials(username=user,
                                                                                               password=password))
 

@@ -1,10 +1,13 @@
 import abc
 import logging
+import os
 from multiprocessing import Process, Queue, Event
 from typing import Any
 
 import pyshark
+import time
 from pyshark import FileCapture
+from pyshark.packet.packet import Packet
 
 
 class PacketReader(abc.ABC, Process):
@@ -15,7 +18,7 @@ class PacketReader(abc.ABC, Process):
         self._stop_event = Event()
 
     def stop_read(self, timeout: int):
-        self._logger.info(f"Остановка {self.__class__.__name__}")
+        # self._logger.info(f"Остановка {self.__class__.__name__}")
         self._stop_event.set()
         self.join(timeout)
         self.terminate()
@@ -41,7 +44,8 @@ class InterfaceReader(PacketReader):
 
     def run(self, *args: Any, **kwargs: Any) -> None:
         self._logger.debug(f"Listening traffic on {self.interface_name}")
-        capture: pyshark.LiveCapture = pyshark.LiveCapture(self.interface_name)
-        while not self._stop_event.is_set():
-            for packet in capture.sniff_continuously():
-                self._queue.put_nowait(packet)
+        capture: pyshark.LiveCapture = pyshark.LiveCapture(interface=self.interface_name)
+        capture.apply_on_packets(callback=self._callback)
+
+    def _callback(self, packet: Packet):
+        self._queue.put_nowait(packet)
