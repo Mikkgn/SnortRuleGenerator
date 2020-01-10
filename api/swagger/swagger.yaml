@@ -3,38 +3,38 @@ info:
   title: Snort Rule Generator Api
   version: 0.0.1
 servers:
-- url: /
+  - url: /
 tags:
-- name: Events
-  description: Attack events
-- name: Definitions
-  description: Definitions
-- name: Analyzer
-  description: Run or Stop traffic analyzer
+  - name: Events
+    description: Attack events
+  - name: Definitions
+    description: Definitions
+  - name: Analyzer
+    description: Run or Stop traffic analyzer
 paths:
   /events:
     get:
       tags:
-      - Events
+        - Events
       summary: Get events
       operationId: get_events
       parameters:
-      - name: offset
-        in: query
-        required: true
-        style: form
-        explode: true
-        schema:
-          type: integer
-          default: 0
-      - name: limit
-        in: query
-        required: true
-        style: form
-        explode: true
-        schema:
-          type: integer
-          default: 20
+        - name: offset
+          in: query
+          required: true
+          style: form
+          explode: true
+          schema:
+            type: integer
+            default: 0
+        - name: limit
+          in: query
+          required: true
+          style: form
+          explode: true
+          schema:
+            type: integer
+            default: 20
       responses:
         200:
           description: Events list
@@ -43,20 +43,21 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Event'
+                  type: object
                 x-content-type: application/json
       x-openapi-router-controller: api.controllers.events_controller
   /analyzer/start:
     post:
       tags:
-      - Analyzer
+        - Analyzer
       summary: Start traffic analyzer
       operationId: start_traffic_analyzer
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/StartRequest'
+              type: object
+              x-body-name: start_request
       responses:
         204:
           description: Started successfully
@@ -64,13 +65,108 @@ paths:
   /analyzer/stop:
     post:
       tags:
-      - Analyzer
+        - Analyzer
       summary: Start traffic analyzer
       operationId: stop_traffic_analyzer
       responses:
         204:
           description: Stopped successfully
       x-openapi-router-controller: api.controllers.analyzer_controller
+
+  /rules:
+    get:
+      tags:
+        - Rules
+      summary: Get SNORT rules
+      operationId: get_rules
+      responses:
+        200:
+          description: List of rules
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+      x-openapi-router-controller: api.controllers.rule_controller
+
+    delete:
+      tags:
+        - Rules
+      summary: Remove ALL SNORT rules
+      operationId: remove_rules
+      responses:
+        204:
+          description: Rules deleted
+      x-openapi-router-controller: api.controllers.rule_controller
+
+  /signs:
+    post:
+      tags:
+        - Signs
+      summary: Create signs
+      operationId: create_sign
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              x-body-name: data
+      responses:
+        204:
+          description: Created successfully
+      x-openapi-router-controller: api.controllers.signs_controller
+
+    get:
+      tags:
+        - Signs
+      summary: Get signs
+      operationId: get_signs
+      parameters:
+        - name: offset
+          in: query
+          required: true
+          style: form
+          explode: true
+          schema:
+            type: integer
+            default: 0
+        - name: limit
+          in: query
+          required: true
+          style: form
+          explode: true
+          schema:
+            type: integer
+            default: 20
+      responses:
+        200:
+          description: List of definitions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+      x-openapi-router-controller: api.controllers.signs_controller
+
+  /signs/{sign_id}:
+    delete:
+      tags:
+        - Signs
+      summary: Remove signs
+      operationId: remove_sign
+      parameters:
+        - name: sign_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        204:
+          description: sign deleted
+      x-openapi-router-controller: api.controllers.signs_controller
+
 components:
   schemas:
     Event:
@@ -84,8 +180,8 @@ components:
     Reader:
       type: string
       enum:
-      - pcap
-      - interface
+        - pcap
+        - interface
     StartRequest:
       type: object
       properties:

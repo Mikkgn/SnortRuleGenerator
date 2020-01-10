@@ -7,17 +7,24 @@ root:
 disable_existing_loggers: true
 
 loggers:
+  common:
+    level: INFO
+  connexion:
+    level: ERROR
+  openapi_spec_validator:
+    level: ERROR
+  alembic:
+    level: INFO
   pika:
     level: INFO
-
 
 handlers:
   console:
     class:     logging.StreamHandler
-    formatter: default
+    formatter: json
     level:     DEBUG
     stream:    ext://sys.stdout
 
 formatters:
-  default:
-    format:  "[%(levelname)-8s] %(asctime)s '%(name)s.%(funcName)s:%(lineno)s': %(message)s"
+  json:
+    format:  "{'level': '%(levelname)s', 'time': '%(asctime)s', 'process': '%(process)s', 'thread': '%(threadName)s', 'function': '%(name)s.%(funcName)s:%(lineno)s', 'message': '%(message)s'}"

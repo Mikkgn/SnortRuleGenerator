@@ -1,11 +1,8 @@
-import connexion
-import six
-
-from api.models.event import Event  # noqa: E501
-from api import util
+from flask import current_app
+from api.db.models import Event
 
 
-def get_events(offset, limit):  # noqa: E501
+def get_events(offset: int = 0, limit: int = 0):  # noqa: E501
     """Get events
 
      # noqa: E501
@@ -15,6 +12,6 @@ def get_events(offset, limit):  # noqa: E501
     :param limit: 
     :type limit: int
 
-    :rtype: List[Event]
+    :rtype: List[object]
     """
-    return 'do some magic!'
+    return current_app.scoped_session.query(Event).slice(offset, offset + limit).all()

@@ -27,14 +27,14 @@ WORKDIR /opt
 
 # ------------------- tests ------------------
 
-FROM stage0 as test_stage
-
-RUN pip3 install mypy==0.730 sqlalchemy-stubs==0.1
-
-COPY api/ /opt/api/
-COPY mypy.ini /opt/mypy.ini
-
-RUN mypy --config-file mypy.ini api/
+#FROM stage0 as test_stage
+#
+#RUN pip3 install mypy==0.730 sqlalchemy-stubs==0.1
+#
+#COPY api/ /opt/api/
+#COPY mypy.ini /opt/mypy.ini
+#
+#RUN mypy --config-file mypy.ini api/
 
 # -------------------- final -----------------------
 

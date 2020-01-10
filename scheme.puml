@@ -1,12 +1,6 @@
 @startuml
 PostgreSQL -[hidden]-> backend
 
-database "PostgreSQL" {
-    database events
-    database definitions {
-        database signs
-    }
-}
 
 
 package frontend {
@@ -14,7 +8,13 @@ package frontend {
 }
 
 package backend {
+
+
     [Analyzer]
+    database "PostgreSQL" {
+        }
+
+    [RuleGenerator] -[hidden]left->Analyzer
     package RabbitMQ{
         WebSocket -[hidden]-> WebSocket
         WebSocket <-[hidden]up-> AMQP
@@ -28,13 +28,20 @@ backend -[hidden]up->PostgreSQL
 
 RabbitMQ-[hidden]up->Analyzer
 [API] -> AMQP
-AMQP -> Analyzer
-Analyzer -> events
+AMQP <-> Analyzer
+Analyzer -> PostgreSQL
 Analyzer -> WebSocket
 GUI <- WebSocket
-HTTP <-> GUI
-API <-> definitions
-frontend -[hidden]up-> backend
+HTTP <-up-> GUI
+
+API -[hidden]down->RuleGenerator
+
+API <-up- PostgreSQL
+RuleGenerator -[hidden]right-> API
+API -[hidden]left-> RuleGenerator
+RuleGenerator -up-> PostgreSQL
+RuleGenerator <- AMQP
+
 
 
 @enduml

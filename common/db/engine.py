@@ -43,13 +43,13 @@ def wait_db(db_host: str, db_name: str, db_user: str, db_pass: str, attemps: int
     exit(1)
 
 
-def init_db(config: Dict) -> None:
+def init_db(config: Dict, service_name: str) -> None:
     url = get_database_conn_url(**config)
     if not database_exists(url):
         create_database(url)
 
     alembic_cfg = Config()
-    alembic_cfg.set_main_option('script_location', 'analyzer/db/migrations')
+    alembic_cfg.set_main_option('script_location', f'{service_name}/db/migrations')
     try:
         command.upgrade(alembic_cfg, "head")
     except Exception as e:

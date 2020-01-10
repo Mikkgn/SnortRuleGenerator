@@ -17,7 +17,7 @@ services:
 
   analyzer:
     container_name: analyzer
-    image: michailgg/analyzer:latest
+    image: michailgg/snortrulegenerator-analyzer:latest
     environment:
       DB_HOST: ${DB_HOST:-localhost}
       DB_USER: ${DB_USER}
@@ -51,25 +51,40 @@ services:
     networks:
       - backend_nw
 
-#  api:
-#    container_name: api
-#    image: michailgg/snortruleapi:latest
-#    build:
-#      dockerfile: api/Dockerfile
-#      context: .
-#    environment:
-#      DB_HOST: ${DB_HOST:-localhost}
-#      DB_USER: ${DB_USER}
-#      DB_PASS: ${DB_PASS}
-#    depends_on:
-#      - db
-#      - rabbitmq-stomp
-#    networks:
-#      - backend_nw
-#      - frontend_nw
-#    volumes:
-#      - ${PROJECT_DIR}:/opt/
+  api:
+    container_name: api
+    image: michailgg/snortrulegenerator-api:latest
+    build:
+      dockerfile: api/Dockerfile
+      context: .
+    environment:
+      DB_HOST: ${DB_HOST:-db}
+      DB_USER: ${DB_USER}
+      DB_PASS: ${DB_PASS}
+    depends_on:
+      - db
+      - rabbitmq-stomp
+    ports:
+      - 8080:8080
+    networks:
+      - backend_nw
+      - frontend_nw
+    volumes:
+      - ${PROJECT_DIR}:/opt/
 
+  gui:
+    container_name: gui
+    image: michailgg/snortrulegenrator-gui:latest
+    build:
+      dockerfile: gui/Dockerfile
+      context: .
+    networks:
+      - frontend_nw
+    volumes:
+      - ${PROJECT_DIR}:/opt/
+      - /opt/gui/node_modules
+    ports:
+      - 80:4200
 
 networks:
   backend_nw:
