@@ -1,0 +1,93 @@
+version: '2.1'
+
+services:
+  db:
+    container_name: db
+    image: postgres:12.0-alpine
+    restart: always
+    networks:
+      - backend_nw
+    environment:
+      POSTGRES_USER: ${DB_USER:-root}
+      POSTGRES_PASSWORD: ${DB_PASS:-P@ssw0rd}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+
+  analyzer:
+    container_name: analyzer
+    image: michailgg/snortrulegenerator-analyzer:latest
+    environment:
+      RABBITMQ_HOST: ${RABBITMQ_HOST:-localhost}
+      RABBITMQ_USER: ${RABBITMQ_USER:-root}
+      RABBITMQ_PASS: ${RABBITMQ_PASS:-P@ssword}
+      TZ: ${TZ}
+    depends_on:
+      - db
+      - rabbitmq-stomp
+    network_mode: host
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+
+  rabbitmq-stomp:
+    container_name: rabbitmq
+    image: michailgg/rabbitmq-stomp:latest
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-root}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS:-P@ssword}
+    volumes:
+      - rabbitmq_data:/data
+    ports:
+      - 15674:15674
+      - 15672:15672
+      - 5672:5672
+      - 61613:61613
+    networks:
+      - backend_nw
+
+  api:
+    container_name: api
+    image: michailgg/snortrulegenerator-api:latest
+    environment:
+      DB_HOST: ${DB_HOST:-db}
+      DB_USER: ${DB_USER:-root}
+      DB_PASS: ${DB_PASS:-P@ssw0rd}
+      TZ: ${TZ}
+    depends_on:
+      - db
+      - rabbitmq-stomp
+    ports:
+      - 8080:8080
+    networks:
+      - backend_nw
+      - frontend_nw
+
+  rule_generator:
+    container_name: rule_generator
+    image: michailgg/snortrulegenerator-rule_generator:latest
+    environment:
+      TZ: ${TZ}
+    depends_on:
+      - rabbitmq-stomp
+    networks:
+      - backend_nw
+
+  gui:
+    container_name: gui
+    image: michailgg/snortrulegenrator-gui:latest
+    networks:
+      - frontend_nw
+    ports:
+      - 80:4200
+
+networks:
+  backend_nw:
+    driver: bridge
+  frontend_nw:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  rabbitmq_data:
