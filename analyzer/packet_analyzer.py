@@ -63,11 +63,11 @@ class PacketAnalyzer(Process):
                     self._logger.warning(f"Sign {sign.name}")
                     self._send_event(packet, sign)
 
-    def _send_event(self, packet: Packet, sign: [AttackSign]):
+    def _send_event(self, packet: Packet, sign: AttackSign):
         """
         Function add Event Message to RabbitMQ queue
         """
-        event_message = EventMessage(sign_id=sign['id'], packet=packet_to_dict(packet))
+        event_message = EventMessage(sign_id=sign['id'], packet=packet_to_dict(packet), sign=sign.to_dict())
         self._publisher.publish('attack_event', 'attack.detected', event_message)
 
     def stop(self):

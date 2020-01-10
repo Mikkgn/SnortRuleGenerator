@@ -90,5 +90,4 @@ class Listener(AMQPClient):
         self._current_process = None
         self._analyzer.stop_analyze()
         self._analyzer = None
-        self._queue.close()
         self._publisher.publish('analyzer', 'status.changed', {'status': 'disabled'})

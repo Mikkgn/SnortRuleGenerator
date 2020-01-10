@@ -1,0 +1,11 @@
+beautifulsoup4==4.4.1
+certifi==2019.3.9
+configobj==5.0.6
+cvss==1.9
+netaddr==0.7.18
+python-dateutil==2.8.0
+pyyaml==5.1.2
+pika===1.1.0
+six==1.11.0
+urllib3==1.25.3
+xmltodict==0.11.0

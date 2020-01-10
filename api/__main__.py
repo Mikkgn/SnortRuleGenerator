@@ -9,6 +9,7 @@ from api.analyzer_status_handlers import AnalyzerStatusHandler
 from api.config import configuration
 from api.events_handler import EventsHandler
 from api.middleware import no_result_found, internal_server_error, shutdown_session
+from api.rule_handler import RuleHandler
 from common.amqp_publisher import AMQPPublisher
 from common.db.engine import create_scoped_session, init_db, wait_db
 
@@ -25,6 +26,9 @@ def main():
     events_handler = EventsHandler(**configuration['rabbitmq_config'],
                                    scoped_session=create_scoped_session(configuration['db_config']))
     events_handler.start()
+    rule_handler = RuleHandler(**configuration['rabbitmq_config'],
+                               scoped_session=create_scoped_session(configuration['db_config']))
+    rule_handler.start()
     app.app.json_encoder = encoder.JSONEncoder
     app.app.amqp_publisher = AMQPPublisher(**configuration['rabbitmq_config'])
     app.app.scoped_session = create_scoped_session(configuration['db_config'])

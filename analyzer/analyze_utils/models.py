@@ -8,6 +8,7 @@ from pyshark.packet.packet import Packet
 class EventMessage(TypedDict, total=False):
     sign_id: str
     packet: Dict
+    sign: Dict
     created_at: datetime
 
 

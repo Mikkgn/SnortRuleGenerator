@@ -34,6 +34,9 @@ class AttackSign:
     def __getitem__(self, key: SignInterfaceKeys):
         return self._sign[key]
 
+    def to_dict(self) -> Dict:
+        return self._sign
+
     @property
     def name(self) -> str:
         return self._sign['name']

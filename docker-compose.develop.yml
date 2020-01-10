@@ -77,6 +77,21 @@ services:
     volumes:
       - ${PROJECT_DIR}:/opt/
 
+  rule_generator:
+    container_name: rule_generator
+    image: michailgg/snortrulegenerator-rule_generator:latest
+    build:
+      dockerfile: rule_generator/Dockerfile
+      context: .
+    environment:
+      TZ: ${TZ}
+    depends_on:
+      - rabbitmq-stomp
+    networks:
+      - backend_nw
+    volumes:
+      - ${PROJECT_DIR}:/opt/
+
   gui:
     container_name: gui
     image: michailgg/snortrulegenrator-gui:latest
