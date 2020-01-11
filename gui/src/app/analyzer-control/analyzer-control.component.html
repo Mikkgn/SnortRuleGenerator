@@ -12,6 +12,10 @@
                     <mat-icon color="warn">lens</mat-icon>
                     {{currentState.status}}
                 </span>
+                <span *ngIf="currentState.status === 'DISABLED'">
+                    <mat-icon color="primary">lens</mat-icon>
+                    {{currentState.status}}
+                </span>
             </mat-card-content>
         </mat-card>
     </div>
@@ -21,11 +25,11 @@
                 Actions
             </mat-card-title>
             <mat-card-content>
-                <button mat-raised-button color="primary">
+                <button mat-raised-button class="buttons" (click)="openStartDialog()" color="primary">
                     <mat-icon>play_arrow</mat-icon>
                     Run
                 </button>
-                <button mat-raised-button color="warn">
+                <button mat-raised-button class="buttons" (click)="stopAnalyzer()" color="warn">
                     <mat-icon>stop</mat-icon>
                     Stop
                 </button>

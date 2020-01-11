@@ -36,7 +36,7 @@ class EventsHandler(AMQPClient):
 
     def _update_analyzer_status(self, message: Dict):
         try:
-            self._scoped_session.add(Event(**message))
+            self._scoped_session.add(Event(sign_id=message['sign_id'], packet=message['packet']))
             self._scoped_session.commit()
         except Exception as exc:
             self._logger.exception(exc)

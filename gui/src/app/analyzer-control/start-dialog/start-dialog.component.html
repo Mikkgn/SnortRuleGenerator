@@ -1,0 +1,33 @@
+<h2 mat-dialog-title>Start analyzer</h2>
+<mat-dialog-content>
+    <mat-form-field>
+        <mat-label>Analyzer type</mat-label>
+        <mat-select [(value)]="startConfig.reader">
+            <mat-option *ngFor="let type of ['interface', 'pcap']" [value]="type">
+                {{type}}
+            </mat-option>
+        </mat-select>
+    </mat-form-field>
+    <mat-form-field *ngIf="startConfig.reader === 'interface'">
+        <mat-label>Interface name</mat-label>
+        <input matInput [(ngModel)]="startConfig.interface_name" placeholder="eth1">
+    </mat-form-field>
+    <mat-form-field *ngIf="startConfig.reader === 'pcap'">
+        <mat-label>Filename</mat-label>
+        <input matInput [(ngModel)]="startConfig.filename" placeholder="test.pcap">
+    </mat-form-field>
+    <mat-form-field>
+        <mat-label>Home network</mat-label>
+        <input matInput [(ngModel)]="startConfig.home_network" placeholder="192.168.0.0/16">
+    </mat-form-field>
+    <mat-form-field>
+        <mat-label>External network</mat-label>
+        <input matInput [(ngModel)]="startConfig.external_network" placeholder="0.0.0.0/0">
+    </mat-form-field>
+
+
+</mat-dialog-content>
+<div mat-dialog-actions>
+    <button mat-raised-button color="primary" (click)="saveChanges()">Save</button>
+    <button mat-raised-button [mat-dialog-close]="false">Cancel</button>
+</div>

@@ -26,6 +26,12 @@ import {RulesService} from "./services/rules.service";
 import {AnalyzerControlService} from "./services/analyzer-control.service";
 import {EventsService} from "./services/events.service";
 import {SignsService} from "./services/signs.service";
+import {MatSnackBarModule} from "@angular/material/snack-bar";
+import {MatDialogModule} from "@angular/material/dialog";
+import {StartDialogComponent} from './analyzer-control/start-dialog/start-dialog.component';
+import {CreateNewDialogComponent} from './definitions/create-new-dialog/create-new-dialog.component';
+import {MatSelectModule} from "@angular/material/select";
+import {MatInputModule} from "@angular/material/input";
 
 
 @NgModule({
@@ -36,7 +42,9 @@ import {SignsService} from "./services/signs.service";
         AnalyzerControlComponent,
         EventsComponent,
         PrettyPrintPipe,
-        RulesComponent
+        RulesComponent,
+        StartDialogComponent,
+        CreateNewDialogComponent,
     ],
     imports: [
         BrowserModule,
@@ -52,20 +60,24 @@ import {SignsService} from "./services/signs.service";
         RouterModule,
         MatTableModule,
         MatCardModule,
-        MatBadgeModule
+        MatBadgeModule,
+        MatSnackBarModule,
+        MatDialogModule,
+        MatSelectModule,
+        MatInputModule
     ],
     providers: [
         StompService,
         RulesService,
         AnalyzerControlService,
         EventsService,
-        SignsService
+        SignsService,
     ],
     bootstrap: [
         AppComponent,
         NavigationComponent
     ],
-    entryComponents: [NavigationComponent]
+    entryComponents: [NavigationComponent, StartDialogComponent, CreateNewDialogComponent]
 })
 export class AppModule {
 }
