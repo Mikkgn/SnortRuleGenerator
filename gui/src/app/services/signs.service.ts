@@ -20,7 +20,7 @@ export class SignsService {
         return this.http.post<ISign>(BaseUrl + '/signs', sign)
     }
 
-    deleteSign(signId: string): Observable<undefined> {
+    deleteSign(signId?: string): Observable<undefined> {
         return this.http.delete<undefined>(BaseUrl + '/signs/' + signId)
     }
 }

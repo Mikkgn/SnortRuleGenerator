@@ -37,7 +37,7 @@ export class DefinitionsComponent implements OnInit {
 
     getSigns() {
         this.signsService.getSigns().subscribe(res => {
-            this.signs = res;
+            this.signs = res as ISign[];
         })
     }
 
