@@ -1,1 +1,48 @@
-<p>create-new-dialog works!</p>
+<h2 mat-dialog-title>Create definition</h2>
+<mat-dialog-content>
+    <mat-form-field>
+        <mat-label>Packet type</mat-label>
+        <mat-select [(value)]="newSign.packet_type">
+            <mat-option *ngFor="let type of ['HTTP', 'TCP']" [value]="type">
+                {{type}}
+            </mat-option>
+        </mat-select>
+    </mat-form-field>
+    <mat-form-field>
+        <mat-label>Source</mat-label>
+        <mat-select [(value)]="newSign.src">
+            <mat-option *ngFor="let type of ['EXTERNAL', 'HOME']" [value]="type">
+                {{type}}
+            </mat-option>
+        </mat-select>
+    </mat-form-field>
+    <mat-form-field>
+        <mat-label>Destination</mat-label>
+        <mat-select [(value)]="newSign.dst">
+            <mat-option *ngFor="let type of ['EXTERNAL', 'HOME']" [value]="type">
+                {{type}}
+            </mat-option>
+        </mat-select>
+    </mat-form-field>
+    <mat-form-field>
+        <mat-label>Result criteria</mat-label>
+        <mat-select [(value)]="newSign.result_criteria">
+            <mat-option *ngFor="let type of ['AT_LEAST_ONE', 'ALL']" [value]="type">
+                {{type}}
+            </mat-option>
+        </mat-select>
+    </mat-form-field>
+    <mat-form-field>
+        <mat-label>Name</mat-label>
+        <input matInput [(ngModel)]="newSign.name" placeholder="name">
+    </mat-form-field>
+    <mat-form-field>
+        <mat-label>Checked fields</mat-label>
+        <textarea matInput [value]="getJsonValue()" (change)="changeJson($event.target.value)" placeholder="[{}]"></textarea>
+    </mat-form-field>
+
+</mat-dialog-content>
+<div mat-dialog-actions>
+    <button mat-raised-button color="primary" (click)="saveChanges()">Save</button>
+    <button mat-raised-button [mat-dialog-close]="false">Cancel</button>
+</div>

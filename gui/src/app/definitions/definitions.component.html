@@ -2,13 +2,17 @@
     <span class="mat-h1">Definitions</span>
 </mat-toolbar>
 <div class="definitions-control">
-    <button mat-raised-button color="primary">New definition</button>
+    <button mat-raised-button color="primary" (click)="openNewDialog()">New definition</button>
 </div>
 <div class="definitions">
     <table mat-table [dataSource]="signs" multiTemplateDataRows class="mat-elevation-z8">
-        <ng-container matColumnDef="{{column}}" *ngFor="let column of columnsToDisplay">
+        <ng-container matColumnDef="{{column}}" *ngFor="let column of ['name', 'src', 'dst', 'result_criteria']">
             <th mat-header-cell *matHeaderCellDef> {{column}} </th>
             <td mat-cell *matCellDef="let element"> {{element[column]}} </td>
+        </ng-container>
+        <ng-container matColumnDef="delete_button">
+            <th mat-header-cell *matHeaderCellDef></th>
+            <td mat-cell *matCellDef="let element"><button mat-button (click)="deleteSign(element)"><mat-icon>delete</mat-icon></button></td>
         </ng-container>
 
         <ng-container matColumnDef="expandedDetail">
