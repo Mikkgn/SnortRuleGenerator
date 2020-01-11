@@ -9,7 +9,6 @@
 ```bash
 docker-compose pull
 docker-compose up -d
-docker logs -f analyzer
 ```
 
 ### Остановка
@@ -32,7 +31,6 @@ Run
 ```bash
 docker-compose pull
 docker-compose up -d
-docker logs -f analyzer
 ```
 
 ### Stop
