@@ -1,9 +1,36 @@
 # SnortRuleGenerator
 
-На текущий момент реализован только тестовый запуск с чтением из pcap файла `test.pcap`
+
+
+### How to run
+The project is designed for educational purposes.
+
+The utility is designed to automatically generate snort rules if there is a template for this rule in the database
+
+Run
+```bash
+docker-compose pull
+docker-compose up -d
+```
+
+### Stop
+
+In project root directory run
+
+```bash
+docker-compose down -v
+```
+
+
+**************
+
+
+
+Проект разработан в учебных целях
+
+Утилита предназначена для автоматической генерации правил snort при наличии в базе шаблона для данного правила
 
 ### Запуск
-Добавьте в корневую директорию проекта файл 'test.pcap'
 
 Выполните
 ```bash
@@ -19,25 +46,4 @@ docker-compose up -d
 docker-compose down -v
 ```
 
-
-**************
-
-
-
-### How to run
-Add to project root directory 'test.pcap' file
-
-Run
-```bash
-docker-compose pull
-docker-compose up -d
-```
-
-### Stop
-
-In project root directory run
-
-```bash
-docker-compose down -v
-```
 
